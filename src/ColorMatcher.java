@@ -15,6 +15,9 @@ public class ColorMatcher {
     private JSlider redSlider;
     private JSlider greenSlider;
     private JSlider blueSlider;
+    private Timer timer;
+    private int timeLeft;
+
     public static void main(String[] args) {
         EventQueue.invokeLater(() -> {
             try {
@@ -55,6 +58,17 @@ public class ColorMatcher {
 
         generateRandomTargetColor();
         updateCurrentColor();
+
+        timeLeft = 60;
+        timer = new Timer(1000, e -> {
+            timeLeft--;
+            if (timeLeft == 0) {
+                timer.stop();
+                double score = calculateScore();
+                JOptionPane.showMessageDialog(frame, "Time's up! Your score: " + String.format("%.2f", score) + "%");
+            }
+        });
+        timer.start();
     }
 
     private JSlider createColorSlider(JPanel parent, String label) {
@@ -78,5 +92,15 @@ public class ColorMatcher {
     private void updateCurrentColor() {
         Color currentColor = new Color(redSlider.getValue(), greenSlider.getValue(), blueSlider.getValue());
         colorPanel.setBackground(currentColor);
+    }
+
+    private double calculateScore() {
+        Color currentColor = new Color(redSlider.getValue(), greenSlider.getValue(), blueSlider.getValue());
+        double maxDifference = 255.0 * 3;
+        double actualDifference = Math.abs(currentColor.getRed() - targetColor.getRed()) +
+                Math.abs(currentColor.getGreen() - targetColor.getGreen()) +
+                Math.abs(currentColor.getBlue() - targetColor.getBlue());
+        double score = 100.0 - ((actualDifference / maxDifference) * 100);
+        return score;
     }
 }
