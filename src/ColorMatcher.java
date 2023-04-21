@@ -1,8 +1,6 @@
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.Random;
 
 public class ColorMatcher {
@@ -87,8 +85,7 @@ public class ColorMatcher {
             updateTimerLabel();
             if (timeLeft == 0) {
                 timer.stop();
-                double score = calculateScore();
-                JOptionPane.showMessageDialog(frame, "Time's up! Your score: " + String.format("%.2f", score) + "%");
+                showScoreWindow();
             }
         });
         timer.start();
@@ -131,5 +128,35 @@ public class ColorMatcher {
                 Math.abs(currentColor.getBlue() - targetColor.getBlue());
         double score = 100.0 - ((actualDifference / maxDifference) * 100);
         return score;
+    }
+
+    private void showScoreWindow() {
+        double score = calculateScore();
+        String message = "Time's up! Your score: " + String.format("%.2f", score) + "%";
+
+        JButton tryAgainButton = new JButton("Try Again");
+        tryAgainButton.addActionListener(e -> {
+            resetGame();
+            Window window = SwingUtilities.getWindowAncestor(tryAgainButton);
+            window.dispose();
+        });
+
+        JButton closeButton = new JButton("Close");
+        closeButton.addActionListener(e -> {
+            System.exit(0);
+        });
+
+        Object[] options = {tryAgainButton, closeButton};
+        JOptionPane.showOptionDialog(frame, message, "Game Over",
+                JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE,
+                null, options, options[0]);
+    }
+
+    private void resetGame() {
+        generateRandomTargetColor();
+        updateCurrentColor();
+        timeLeft = 60;
+        updateTimerLabel();
+        timer.restart();
     }
 }
