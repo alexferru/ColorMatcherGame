@@ -1,6 +1,5 @@
 import javax.swing.*;
-import javax.swing.event.ChangeEvent;
-import  javax.swing.event.ChangeListener;
+import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -11,16 +10,19 @@ public class ColorMatcher {
     private JFrame frame;
     private JPanel colorPanel;
     private JPanel targetPanel;
+    private JPanel currentPanel;
     private Color targetColor;
     private JSlider redSlider;
     private JSlider greenSlider;
     private JSlider blueSlider;
     private Timer timer;
     private int timeLeft;
+    private JLabel timerLabel;
 
     public static void main(String[] args) {
         EventQueue.invokeLater(() -> {
             try {
+                UIManager.setLookAndFeel("javax.swing.plaf.nimbus.NimbusLookAndFeel");
                 ColorMatcher window = new ColorMatcher();
                 window.frame.setVisible(true);
             } catch (Exception e) {
@@ -32,11 +34,25 @@ public class ColorMatcher {
     public ColorMatcher() {
         initialize();
     }
+
     private void initialize() {
-        frame = new JFrame();
-        frame.setBounds(100, 100, 450, 300);
+        frame = new JFrame("Color Matcher");
+        frame.setBounds(100, 100, 500, 400);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.getContentPane().setLayout(new BorderLayout(0, 0));
+
+        JPanel topPanel = new JPanel();
+        topPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
+        frame.getContentPane().add(topPanel, BorderLayout.NORTH);
+        topPanel.setLayout(new BorderLayout(0, 0));
+
+        JLabel titleLabel = new JLabel("Color Matcher");
+        titleLabel.setFont(new Font("Arial", Font.BOLD, 20));
+        topPanel.add(titleLabel, BorderLayout.WEST);
+
+        timerLabel = new JLabel("01:00");
+        timerLabel.setFont(new Font("Arial", Font.BOLD, 18));
+        topPanel.add(timerLabel, BorderLayout.EAST);
 
         colorPanel = new JPanel();
         frame.getContentPane().add(colorPanel, BorderLayout.CENTER);
@@ -44,9 +60,15 @@ public class ColorMatcher {
 
         targetPanel = new JPanel();
         colorPanel.add(targetPanel);
+        targetPanel.setLayout(new BorderLayout());
+        JLabel targetLabel = new JLabel("Target Color", SwingConstants.CENTER);
+        targetPanel.add(targetLabel, BorderLayout.NORTH);
 
-        JPanel currentPanel = new JPanel();
+        currentPanel = new JPanel();
         colorPanel.add(currentPanel);
+        currentPanel.setLayout(new BorderLayout());
+        JLabel currentLabel = new JLabel("Current Color", SwingConstants.CENTER);
+        currentPanel.add(currentLabel, BorderLayout.NORTH);
 
         JPanel controlsPanel = new JPanel();
         frame.getContentPane().add(controlsPanel, BorderLayout.SOUTH);
@@ -62,6 +84,7 @@ public class ColorMatcher {
         timeLeft = 60;
         timer = new Timer(1000, e -> {
             timeLeft--;
+            updateTimerLabel();
             if (timeLeft == 0) {
                 timer.stop();
                 double score = calculateScore();
@@ -91,7 +114,13 @@ public class ColorMatcher {
 
     private void updateCurrentColor() {
         Color currentColor = new Color(redSlider.getValue(), greenSlider.getValue(), blueSlider.getValue());
-        colorPanel.setBackground(currentColor);
+        currentPanel.setBackground(currentColor);
+    }
+
+    private void updateTimerLabel() {
+        int minutes = timeLeft / 60;
+        int seconds = timeLeft % 60;
+        timerLabel.setText(String.format("%02d:%02d", minutes, seconds));
     }
 
     private double calculateScore() {
